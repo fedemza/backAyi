@@ -1,5 +1,6 @@
-const Usuarios = require("../models/usuarioModel");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
+const Usuarios = require("../models/usuarioModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -28,15 +29,19 @@ const createUser = async (req, res) => {
       res.status(400).json({ msg: "El nombre o el email son inválidos" });
       return;
     }
-
-    const usuario = new Usuarios({
-      nombre,
-      email,
-      contraseña,
+    bcrypt.hash(contraseña + "", 10, function (err, hash) {
+      if (err) {
+        res.status(500).json({ msg: "Error al encriptar la contraseña", err });
+        return;
+      }
+      const usuario = new Usuarios({
+        nombre,
+        email,
+        contraseña: hash,
+      });
+      usuario.save();
+      res.json({ msg: "Usuario creado con éxito" });
     });
-
-    await usuario.save();
-    res.json({ msg: "Usuario creado con éxito" });
   } catch (err) {
     res.status(400).json({ msg: "No se pudo guardar el usuario", error: err });
   }
@@ -47,22 +52,27 @@ const updateUser = async (req, res) => {
 
   try {
     if (
-      !validator.isAlpha(nombre, ["en-US"], { ignore: " " }) ||
-      !validator.isEmail(email)
+      (nombre && !validator.isAlpha(nombre, ["en-US"], { ignore: " " })) ||
+      (email && !validator.isEmail(email))
     ) {
       res.status(400).json({ msg: "El nombre o el email son inválidos" });
       return;
     }
-    // const usuario = await Usuarios.find({ _id: req.params.id });
-    // console.log(usuario);
-    await Usuarios.findByIdAndUpdate(req.params.id, {
-      $set: {
-        nombre,
-        email,
-        contraseña,
-      },
+
+    bcrypt.hash(contraseña + "", 10, async function (err, hash) {
+      if (err) {
+        res.status(500).json({ msg: "Error al encriptar la contraseña", err });
+        return;
+      }
+
+      await Usuarios.findByIdAndUpdate(req.params.id, {
+        nombre: nombre,
+        email: email,
+        contraseña: contraseña,
+      });
+
+      res.json({ msg: "Usuario actualizado con éxito" });
     });
-    res.json({ msg: "Usuario actualizado con éxito" });
   } catch (err) {
     res.status(400).json({ msg: "No se pudo actualizar el usuario" });
     return;

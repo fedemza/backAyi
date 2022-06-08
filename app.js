@@ -6,6 +6,7 @@ const rutasProductos = require("./routes/productosRutas");
 const rutasUsuarios = require("./routes/usuariosRutas");
 const rutasVentas = require("./routes/ventasRutas");
 const rutasAuth = require("./routes/authRutas");
+const verificarToken = require("./middlewares/auth");
 
 app = express();
 const port = process.env.PORT || 3000;
@@ -15,9 +16,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/", rutasAuth);
-app.use("/usuarios", rutasUsuarios);
-app.use("/productos", rutasProductos);
-app.use("/ventas", rutasVentas);
+app.use("/usuarios", verificarToken, rutasUsuarios);
+app.use("/productos", verificarToken, rutasProductos);
+app.use("/ventas", verificarToken, rutasVentas);
 
 mongoose
   .connect(urlDatabase)

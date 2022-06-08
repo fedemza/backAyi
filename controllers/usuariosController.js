@@ -4,7 +4,7 @@ const Usuarios = require("../models/usuarioModel");
 
 const getAllUsers = async (req, res) => {
   try {
-    const usuarios = await Usuarios.find({ estado: true });
+    const usuarios = await Usuarios.find({ activo: true });
     res.json(usuarios);
   } catch (err) {
     console.log({ msg: "Hubo un error en la consulta", error: err });

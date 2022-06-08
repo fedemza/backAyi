@@ -7,6 +7,7 @@ const getAllProducts = async (req, res) => {
     res.json(productos);
   } catch (err) {
     console.log({ msg: "Hubo un error en la consulta", error: err });
+    res.status(400).json({ msg: "No se pudo obtener los productos" });
   }
 };
 

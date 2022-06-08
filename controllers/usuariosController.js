@@ -11,42 +11,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
-  const { nombre, email, contraseña } = req.body;
-
-  try {
-    if (!nombre || !email || !contraseña) {
-      res
-        .status(400)
-        .json({ msg: "El nombre, email o la contraseña no existe" });
-      return;
-    }
-
-    if (
-      !validator.isAlpha(nombre, ["en-US"], { ignore: " " }) ||
-      !validator.isEmail(email)
-    ) {
-      res.status(400).json({ msg: "El nombre o el email son inválidos" });
-      return;
-    }
-    bcrypt.hash(contraseña + "", 10, function (err, hash) {
-      if (err) {
-        res.status(500).json({ msg: "Error al encriptar la contraseña", err });
-        return;
-      }
-      const usuario = new Usuarios({
-        nombre,
-        email,
-        contraseña: hash,
-      });
-      usuario.save();
-      res.json({ msg: "Usuario creado con éxito" });
-    });
-  } catch (err) {
-    res.status(400).json({ msg: "No se pudo guardar el usuario", error: err });
-  }
-};
-
 const updateUser = async (req, res) => {
   const { nombre, email, contraseña } = req.body;
 
@@ -68,7 +32,7 @@ const updateUser = async (req, res) => {
       await Usuarios.findByIdAndUpdate(req.params.id, {
         nombre: nombre,
         email: email,
-        contraseña: contraseña,
+        contraseña: hash,
       });
 
       res.json({ msg: "Usuario actualizado con éxito" });
@@ -97,7 +61,6 @@ const deactivateUser = async (req, res) => {
 
 module.exports = {
   getAllUsers,
-  createUser,
   updateUser,
   deactivateUser,
 };

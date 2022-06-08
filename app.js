@@ -5,6 +5,7 @@ require("dotenv").config();
 const rutasProductos = require("./routes/productosRutas");
 const rutasUsuarios = require("./routes/usuariosRutas");
 const rutasVentas = require("./routes/ventasRutas");
+const rutasAuth = require("./routes/authRutas");
 
 app = express();
 const port = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ const urlDatabase = process.env.URL_DATABASE;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use("/", rutasAuth);
 app.use("/usuarios", rutasUsuarios);
 app.use("/productos", rutasProductos);
 app.use("/ventas", rutasVentas);

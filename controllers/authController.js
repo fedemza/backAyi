@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Usuarios = require("../models/usuarioModel");
 
-let jwToken = null;
 let blackList = [];
 
 const createUser = async (req, res) => {
@@ -71,7 +70,7 @@ const login = async (req, res) => {
         return;
       }
       if (result) {
-        jwToken = jwt.sign(
+        const jwToken = jwt.sign(
           {
             id: usuario._id,
             nombre: usuario.nombre,

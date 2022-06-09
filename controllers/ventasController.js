@@ -16,7 +16,6 @@ const getSale = async (req, res) => {
     const venta = await Ventas.findById(req.params.id);
 
     const productosId = venta.productosId;
-    console.log(productosId);
 
     Productos.find({ _id: { $in: productosId } }, (err, productos) => {
       if (err) {
@@ -27,8 +26,8 @@ const getSale = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log({ msg: "Hubo un error en la consulta", error: err });
-    res.status(400).json({ msg: "No se pudo obtener la venta" });
+    //console.log({ msg: "Hubo un error en la consulta", error: err });
+    res.status(400).json({ msg: "No se pudo obtener la venta", err });
   }
 };
 
@@ -44,14 +43,14 @@ const createSale = async (req, res) => {
 
     const encontrarProductos = async () => {
       for (let i = 0; i < productosId.length; i++) {
-        let prod = Productos.findById(productosId[i], (err, producto) => {
+        Productos.findById(productosId[i], (err, producto) => {
           console.log(producto);
           if (err) {
             console.log("No se pudo obtener alguno de los productos");
             productos.push("Error");
             res
               .status(400)
-              .json({ msg: "No se pudo obtener alguno de los productos" });
+              .json({ msg: "No se pudo obtener alguno de los productos", err });
             return;
           } else {
             productos.push(producto);
@@ -68,6 +67,15 @@ const createSale = async (req, res) => {
         total,
       });
       await venta.save();
+
+      productosId.forEach(async (producto) => {
+        await Productos.findByIdAndUpdate(producto, {
+          $inc: {
+            ordenesTotales: +1,
+          },
+        });
+      });
+
       res.json({ msg: "Venta creada con éxito" });
       return;
     }
@@ -81,23 +89,49 @@ const createSale = async (req, res) => {
 };
 
 const updateSale = async (req, res) => {
-  const { productos, formaPago, total } = req.body;
+  const { productosId, formaPago, total } = req.body;
 
   try {
-    if (!productos || !total) {
-      res.status(400).json({ msg: "Los productos o el total no existe" });
+    if (!productosId && !total && !formaPago) {
+      res
+        .status(400)
+        .json({ msg: "Los productos, el total o la forma de pago no existe" });
       return;
     }
-    const venta = await Ventas.find({ _id: req.params.id });
-    console.log(venta);
-    await Ventas.findByIdAndUpdate(req.params.id, {
-      $set: {
-        productos,
-        formaPago,
-        total,
-      },
-    });
-    res.json({ msg: "Venta actualizada con éxito" });
+    const productos = [];
+    if (productosId) {
+      const encontrarProductos = async () => {
+        for (let i = 0; i < productosId.length; i++) {
+          Productos.findById(productosId[i], (err, producto) => {
+            if (err) {
+              // console.log("No se pudo obtener alguno de los productos");
+              productos.push("Error");
+              res.status(400).json({
+                msg: "No se pudo obtener alguno de los productos",
+                err,
+              });
+              return;
+            } else {
+              productos.push(producto);
+            }
+          });
+        }
+      };
+      await encontrarProductos();
+    }
+
+    if (!productos.includes("Error")) {
+      const venta = await Ventas.find({ _id: req.params.id });
+
+      await Ventas.findByIdAndUpdate(req.params.id, {
+        $set: {
+          productosId,
+          formaPago,
+          total,
+        },
+      });
+      res.json({ msg: "Venta actualizada con éxito" });
+    }
   } catch (err) {
     res.status(400).json({ msg: "No se pudo actualizar la venta" });
     return;

@@ -10,6 +10,10 @@ const productosSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    ordenesTotales: {
+      type: Number,
+      default: 0,
+    },
     descripcion: String,
     imagen: String,
   },

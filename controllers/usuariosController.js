@@ -1,5 +1,6 @@
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+var ObjectId = require("mongodb").ObjectId;
 const Usuarios = require("../models/usuarioModel");
 
 const getAllUsers = async (req, res) => {
@@ -26,6 +27,16 @@ const updateUser = async (req, res) => {
   const { nombre, email, contraseña } = req.body;
 
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Usuarios.findById(req.params.id))) {
+      res.status(400).json({ msg: "El usuario no existe" });
+      return;
+    }
+
     if (
       (nombre && !validator.isAlpha(nombre, ["en-US"], { ignore: " " })) ||
       (email && !validator.isEmail(email))
@@ -56,6 +67,16 @@ const updateUser = async (req, res) => {
 
 const deactivateUser = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Usuarios.findById(req.params.id))) {
+      res.status(400).json({ msg: "El usuario no existe" });
+      return;
+    }
+
     await Usuarios.findByIdAndUpdate(req.params.id, {
       $set: {
         activo: false,
@@ -70,6 +91,16 @@ const deactivateUser = async (req, res) => {
 
 const activateUser = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Usuarios.findById(req.params.id))) {
+      res.status(400).json({ msg: "El usuario no existe" });
+      return;
+    }
+
     await Usuarios.findByIdAndUpdate(req.params.id, {
       $set: {
         activo: true,
@@ -84,6 +115,15 @@ const activateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Usuarios.findById(req.params.id))) {
+      res.status(400).json({ msg: "El usuario no existe" });
+      return;
+    }
     await Usuarios.findByIdAndDelete(req.params.id);
     res.json({ msg: "Usuario eliminado con éxito" });
     return;

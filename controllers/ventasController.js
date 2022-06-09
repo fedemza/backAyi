@@ -1,3 +1,4 @@
+var ObjectId = require("mongodb").ObjectId;
 const Ventas = require("../models/ventaModel");
 const Productos = require("../models/productoModel");
 
@@ -13,6 +14,16 @@ const getAllSales = async (req, res) => {
 
 const getSale = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Ventas.findById(req.params.id))) {
+      res.status(400).json({ msg: "La venta no existe" });
+      return;
+    }
+
     const venta = await Ventas.findById(req.params.id);
 
     const productosId = venta.productosId;
@@ -96,6 +107,16 @@ const updateSale = async (req, res) => {
   const { productosId, formaPago, total } = req.body;
 
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Ventas.findById(req.params.id))) {
+      res.status(400).json({ msg: "La venta no existe" });
+      return;
+    }
+
     if (!productosId && !total && !formaPago) {
       res
         .status(400)
@@ -144,6 +165,16 @@ const updateSale = async (req, res) => {
 
 const deleteSale = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Ventas.findById(req.params.id))) {
+      res.status(400).json({ msg: "La venta no existe" });
+      return;
+    }
+
     await Ventas.findByIdAndDelete(req.params.id);
     res.json({ msg: "Venta eliminada con éxito" });
   } catch (err) {

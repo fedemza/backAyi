@@ -1,5 +1,6 @@
 const Productos = require("../models/productoModel");
 const validator = require("validator");
+var ObjectId = require("mongodb").ObjectId;
 
 const getAllProducts = async (req, res) => {
   try {
@@ -22,7 +23,6 @@ const createProduct = async (req, res) => {
       res.status(400).json({ msg: "El nombre o el precio son inválidos" });
       return;
     }
-    console.log(await Productos.find({ nombre }));
 
     if ((await Productos.find({ nombre })).length) {
       res.status(400).json({ msg: "El nombre ya existe" });
@@ -46,6 +46,16 @@ const updateProduct = async (req, res) => {
   const { nombre, precio, descripcion, imagen } = req.body;
 
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Productos.findById(req.params.id))) {
+      res.status(400).json({ msg: "El producto no existe" });
+      return;
+    }
+
     if (!validator.isAlpha(nombre) || !validator.isNumeric(precio)) {
       res.status(400).json({ msg: "El nombre o el precio son inválidos" });
       return;
@@ -69,6 +79,16 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).json({ msg: "El id no es válido" });
+      return;
+    }
+
+    if (!(await Productos.findById(req.params.id))) {
+      res.status(400).json({ msg: "El producto no existe" });
+      return;
+    }
+
     const producto = await Productos.findByIdAndDelete(req.params.id);
     if (!producto) {
       res.status(400).json({ msg: "El producto no existe" });

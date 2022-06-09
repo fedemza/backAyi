@@ -22,6 +22,12 @@ const createProduct = async (req, res) => {
       res.status(400).json({ msg: "El nombre o el precio son inválidos" });
       return;
     }
+    console.log(await Productos.find({ nombre }));
+
+    if ((await Productos.find({ nombre })).length) {
+      res.status(400).json({ msg: "El nombre ya existe" });
+      return;
+    }
 
     const producto = new Productos({
       nombre,

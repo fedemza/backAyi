@@ -1,16 +1,25 @@
 const express = require("express");
 const {
-  getAllUsers,
+  getAllActiveUsers,
   updateUser,
   deactivateUser,
+  activateUser,
+  deleteUser,
+  getAllUsers,
 } = require("../controllers/usuariosController");
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
+router.get("/all", getAllUsers);
 
-router.put("/:id", updateUser);
+router.get("/active", getAllActiveUsers);
 
-router.delete("/:id", deactivateUser);
+router.put("/update/:id", updateUser);
+
+router.put("/deactivate/:id", deactivateUser);
+
+router.put("/activate/:id", activateUser);
+
+router.delete("/:id", deleteUser);
 
 module.exports = router;

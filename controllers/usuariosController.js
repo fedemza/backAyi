@@ -4,6 +4,17 @@ const Usuarios = require("../models/usuarioModel");
 
 const getAllUsers = async (req, res) => {
   try {
+    const users = await Usuarios.find();
+    res.status(200).json(users);
+    return;
+  } catch (err) {
+    res.status(500).json({ msg: "Hubo un error en la consulta", error: err });
+    return;
+  }
+};
+
+const getAllActiveUsers = async (req, res) => {
+  try {
     const usuarios = await Usuarios.find({ activo: true });
     res.json(usuarios);
   } catch (err) {
@@ -45,8 +56,6 @@ const updateUser = async (req, res) => {
 
 const deactivateUser = async (req, res) => {
   try {
-    // const usuario = await Usuarios.find({ _id: req.params.id });
-    // console.log(usuario);
     await Usuarios.findByIdAndUpdate(req.params.id, {
       $set: {
         activo: false,
@@ -59,8 +68,36 @@ const deactivateUser = async (req, res) => {
   }
 };
 
+const activateUser = async (req, res) => {
+  try {
+    await Usuarios.findByIdAndUpdate(req.params.id, {
+      $set: {
+        activo: true,
+      },
+    });
+    res.json({ msg: "Usuario dado de alta con éxito" });
+  } catch (err) {
+    res.status(400).json({ msg: "No se pudo dar de alta el usuario" });
+    return;
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    await Usuarios.findByIdAndDelete(req.params.id);
+    res.json({ msg: "Usuario eliminado con éxito" });
+    return;
+  } catch (err) {
+    res.status(400).json({ msg: "No se pudo eliminar el usuario" });
+    return;
+  }
+};
+
 module.exports = {
   getAllUsers,
+  getAllActiveUsers,
   updateUser,
   deactivateUser,
+  activateUser,
+  deleteUser,
 };

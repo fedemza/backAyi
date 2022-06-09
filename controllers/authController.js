@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Usuarios = require("../models/usuarioModel");
 
+let jwToken = null;
 let blackList = [];
 
 const createUser = async (req, res) => {
@@ -40,7 +41,7 @@ const createUser = async (req, res) => {
         contraseña: hash,
       });
       usuario.save();
-      res.json({ msg: "Usuario creado con éxito" });
+      res.json({ msg: "Usuario creado con éxito", id: usuario._id });
     });
   } catch (err) {
     res.status(400).json({ msg: "No se pudo guardar el usuario", error: err });
@@ -59,8 +60,10 @@ const login = async (req, res) => {
 
     const usuario = await Usuarios.findOne({ email });
 
-    if (!usuario) {
-      res.status(400).json({ msg: "El email no existe" });
+    if (!usuario || usuario.activo === false) {
+      res
+        .status(400)
+        .json({ msg: "El email no existe o el usuario esta inactivo" });
       return;
     }
 
@@ -70,13 +73,13 @@ const login = async (req, res) => {
         return;
       }
       if (result) {
-        const jwToken = jwt.sign(
+        jwToken = jwt.sign(
           {
             id: usuario._id,
             nombre: usuario.nombre,
             email: usuario.email,
           },
-          "secret",
+          process.env.JWT_SECRET,
           { expiresIn: "1h" }
         );
         res.json({

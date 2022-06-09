@@ -17,14 +17,18 @@ const getSale = async (req, res) => {
 
     const productosId = venta.productosId;
 
-    Productos.find({ _id: { $in: productosId } }, (err, productos) => {
-      if (err) {
-        res.status(400).json({ msg: "No se pudo obtener los productos" });
-      } else {
-        //productos.push(productos);
-        res.json({ venta: venta, productosVenta: productos });
+    Productos.find(
+      { _id: productosId },
+      { nombre: 1, descripcion: 1 },
+      (err, productos) => {
+        if (err) {
+          res.status(400).json({ msg: "No se pudo obtener los productos" });
+        } else {
+          //productos.push(productos);
+          res.json({ venta: venta, productosVenta: productos });
+        }
       }
-    });
+    );
   } catch (err) {
     //console.log({ msg: "Hubo un error en la consulta", error: err });
     res.status(400).json({ msg: "No se pudo obtener la venta", err });
